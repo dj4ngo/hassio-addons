@@ -1,6 +1,6 @@
 {
   "name": "Access Point",
-  "version": "0.6",
+  "version": "0.7",
   "slug": "access-point",
   "description": "Raspberry Pi as WiFi hotspot",
   "arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],

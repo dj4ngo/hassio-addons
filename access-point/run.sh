@@ -23,6 +23,23 @@ function flush_net () {
 }
 
 
+function clean_stop () {
+	bashio::log.info "Clean stop"
+	bashio::log.info "SIGNAL received : $1"
+	flush_net
+	ifdown $(bashio::config 'interface')
+	ip route show
+	sleep 5
+}
+
+trap 'clean_stop SIGTERM' SIGTERM
+trap 'clean_stop SIGINT' SIGINT
+trap 'clean_stop SIGQUIT' SIGQUIT
+trap 'clean_stop SIGWINCH' SIGWINCH
+trap 'clean_stop KILL' KILL
+trap 'clean_stop KILL' TERM
+trap 'clean_stop EXIT' EXIT
+
 bashio::log.info "Starting..."
 
 # Networking part
@@ -44,7 +61,7 @@ EOF
 
 $DEBUG && cat $INTERFACES_CONFIG
 
-echo "Initial state :"
+bashio::log.info "Initial state :"
 ip addr show  $(bashio::config 'interface')
 
 bashio::log.info "Reset latest interface status"

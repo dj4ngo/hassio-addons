@@ -3,11 +3,8 @@ FROM $BUILD_FROM
 
 MAINTAINER Sébastien Boyron <sebastien@boyron.eu>
 
-# Set shell
-#SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+STOPSIGNAL SIGTERM
 
-
-# Install requirements for add-on
 RUN apk add --no-cache hostapd dnsmasq
 
 COPY dnsmasq.conf /etc/
