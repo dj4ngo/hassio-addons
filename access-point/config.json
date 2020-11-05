@@ -1,0 +1,72 @@
+{
+  "name": "Access Point",
+  "version": "0.3",
+  "slug": "access-point",
+  "description": "Raspberry Pi as WiFi hotspot",
+  "arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],
+  "url": "https://github.com/",
+  "startup": "system",
+  "boot": "auto",
+  "host_network": true,
+  "apparmor": true,
+  "host_dbus": true,
+  "full_access": true,
+  "privileged": [
+    "NET_ADMIN",
+    "SYS_ADMIN",
+    "SYS_RAWIO",
+    "SYS_TIME",
+    "SYS_NICE"
+  ],
+  "devices": [
+    "/dev/mem:/dev/mem:rwm"
+  ],
+  "ports": {
+    "53/tcp": 53,
+    "53/udp": 53
+  },
+  "map": [
+    "config:rw",
+    "ssl:rw",
+    "addons:rw",
+    "share:rw",
+    "backup:rw"
+  ],
+  "options": {
+    "interface": "wlp1s0u1u2",
+    "ssid": "Pi",
+    "wpa_passphrase": "raspberry",
+    "channel": "6",
+    "address": "192.168.99.1",
+    "netmask": "255.255.255.0",
+    "broadcast": "192.168.99.254",
+    "dhcp_range": "192.168.99.100,192.168.99.150",
+    "dns": ["192.168.99.1"],
+    "forwards": [],
+    "hosts": []
+
+  },
+  "schema": {
+    "interface": "str",
+    "ssid": "str",
+    "wpa_passphrase": "str",
+    "channel": "int",
+    "address": "str",
+    "netmask": "str",
+    "broadcast": "str",
+    "dhcp_range": "str",
+    "dns": ["str"],
+    "forwards": [
+      {
+        "domain": "str",
+        "server": "str"
+      }
+    ],
+    "hosts": [
+      {
+        "host": "str",
+        "ip": "str"
+      }
+    ]
+  }
+} 
