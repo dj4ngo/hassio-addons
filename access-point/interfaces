@@ -1,5 +1,0 @@
-auto __INTERFACE__
-iface __INTERFACE__ inet static
-  address __ADDRESS__
-  netmask __NETMASK__
-  broadcast __BROADCAST__
