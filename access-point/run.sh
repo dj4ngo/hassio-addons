@@ -1,6 +1,10 @@
 #!/usr/bin/env bashio
 
-DEBUG=false
+DEBUG=/bin/false
+if [ "$(bashio::config 'debug')" == "true" ]; then
+	DEBUG=/bin/true
+fi
+
 
 HOSTAPD_CONFIG="/etc/hostapd/hostapd.conf"
 INTERFACES_CONFIG="/etc/network/interfaces"
@@ -58,7 +62,6 @@ sed -i "s/__SSID__/$(bashio::config 'ssid')/" $HOSTAPD_CONFIG
 sed -i "s/__CHANNEL__/$(bashio::config 'channel')/" $HOSTAPD_CONFIG
 sed -i "s/__WPA_PASSPHRASE__/$(bashio::config 'wpa_passphrase')/" $HOSTAPD_CONFIG
 
-echo "################# $(bashio::config 'masked_ssid')"
 if [ "$(bashio::config 'masked_ssid')" == "true" ]; then
 	echo "ignore_broadcast_ssid=1" >> $HOSTAPD_CONFIG
 fi
@@ -111,8 +114,11 @@ $DEBUG && cat $DNSMASQ_CONFIG
 bashio::log.info "Starting HostAP daemon ..." 
 hostapd  -B -P /tmp/hostapd.pid /etc/hostapd/hostapd.conf 
 
-
+$DEBUG && bashio::log.debug "Print Network configuration"
+$DEBUG && bashio::log.debug "ip addr show $(bashio::config 'interface')"
 $DEBUG && ip addr show $(bashio::config 'interface')
+$DEBUG && bashio::log.debug "ip route show"
+$DEBUG && ip route show
 
 bashio::log.info "Starting dnsmasq..."
 dnsmasq -C "${DNSMASQ_CONFIG}" -z -x /tmp/dnsmasq.pid
@@ -135,17 +141,3 @@ while :; do
 
 	sleep 10
 done
-
-# SIGTERM-handler this funciton will be executed when the container receives the SIGTERM signal (when stopping)
-term_handler(){
-	bashio::log.info "Stop..."
-	jobs=$(jobs -p)
-	if [ "$jobs" != "" ]; then
-		bashio::log.info "Kill all running jobs ($(jobs -p))"
-		kill $jobs
-	fi
-	echo "$? $LINENO"
-	exit 0
-}
-
-
