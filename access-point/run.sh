@@ -58,6 +58,11 @@ sed -i "s/__SSID__/$(bashio::config 'ssid')/" $HOSTAPD_CONFIG
 sed -i "s/__CHANNEL__/$(bashio::config 'channel')/" $HOSTAPD_CONFIG
 sed -i "s/__WPA_PASSPHRASE__/$(bashio::config 'wpa_passphrase')/" $HOSTAPD_CONFIG
 
+echo "################# $(bashio::config 'masked_ssid')"
+if [ "$(bashio::config 'masked_ssid')" == "true" ]; then
+	echo "ignore_broadcast_ssid=1" >> $HOSTAPD_CONFIG
+fi
+
 $DEBUG && cat $HOSTAPD_CONFIG
 
 
