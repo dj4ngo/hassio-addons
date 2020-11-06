@@ -89,51 +89,61 @@ bashio::log.debug "Create ${HOSTAPD_CONFIG%/*} dir"
 mkdir -p ${HOSTAPD_CONFIG%/*}
 
 bashio::log.info "Configure hostapd ..."
-cat << EOF > ${HOSTAPD_CONFIG}
-interface=$(bashio::config 'interface')
-driver=nl80211
-# Use the 2.4GHz band
-hw_mode=g
-# Accept all MAC addresses
-macaddr_acl=0
-ssid=$(bashio::config 'ssid')
-channel=$(bashio::config 'channel')
-EOF
 
+for line in $(bashio::config 'hostapd_config'); do
+	echo $line >> ${HOSTAPD_CONFIG}
+done
+#bashio::config 'hostapd_config' > $HOSTAPD_CONFIG
 
-case $(bashio::config 'auth_alg') in
-	wep)
-		cat << EOF >> ${HOSTAPD_CONFIG}
-ignore_broadcast_ssid=0
-wep_default_key=1
-wep_key1=$(bashio::config 'wep_key')
-wep_key_len_broadcast=5
-wep_key_len_unicast=5
-wep_rekey_period=300
-EOF
-		;;
-	wpa2)
-		cat << EOF >> ${HOSTAPD_CONFIG}
-# Bit field: 1=wpa, 2=wep, 3=both
-auth_algs=1
-wpa=2
-wpa_key_mgmt=WPA-PSK
-rsn_pairwise=CCMP
-wpa_pairwise=CCMP
-wpa_passphrase=$(bashio::config 'wpa_passphrase')
-EOF
-		;;
-	*)
-		bashio::log.error "Error: auth_alg parameter not 'wep' or 'wpa2' !"
-		exit 3
-		;;
-esac
-
-
-
-if [ "$(bashio::config 'masked_ssid')" == "true" ]; then
-	echo "ignore_broadcast_ssid=1" >> $HOSTAPD_CONFIG
-fi
+#cat << EOF > ${HOSTAPD_CONFIG}
+#interface=$(bashio::config 'interface')
+#macaddr_acl=0
+#debug=0
+#auth_algs=3
+#
+#ssid=$(bashio::config 'ssid')
+#channel=$(bashio::config 'channel')
+#EOF
+#
+#
+#case $(bashio::config 'auth_alg') in
+#	wep)
+#		cat << EOF >> ${HOSTAPD_CONFIG}
+#ignore_broadcast_ssid=0
+#wep_default_key=1
+#wep_key1=$(bashio::config 'wep_key')
+#wep_key_len_broadcast=5
+#wep_key_len_unicast=5
+#wep_rekey_period=300
+#EOF
+#		;;
+#	wpa2)
+#		cat << EOF >> ${HOSTAPD_CONFIG}
+#eapol_key_index_workaround=0
+#eap_server=0
+#wpa=3
+#wpa_passphrase=$(bashio::config 'wpa_passphrase')
+#wpa_key_mgmt=WPA-PSK
+#wpa_pairwise=CCMP
+#
+### Bit field: 1=wpa, 2=wep, 3=both
+##wpa=2
+##wpa_key_mgmt=WPA-PSK
+##wpa_pairwise=CCMP
+##wpa_passphrase=$(bashio::config 'wpa_passphrase')
+#EOF
+#		;;
+#	*)
+#		bashio::log.error "Error: auth_alg parameter not 'wep' or 'wpa2' !"
+#		exit 3
+#		;;
+#esac
+#
+#
+#
+#if [ "$(bashio::config 'masked_ssid')" == "true" ]; then
+#	echo "ignore_broadcast_ssid=1" >> $HOSTAPD_CONFIG
+#fi
 
 $DEBUG && cat $HOSTAPD_CONFIG
 
@@ -216,14 +226,12 @@ while :; do
 	if ! ps aux | grep -q $(cat /tmp/hostapd.pid); then
 		bashio::log.error "hostapd is down !"
 		flush_net 
-		kill $(cat /tmp/hostapd.pid)
 		exit 1
 	fi
 
-	if ! ps aux | grep -q $(cat /tmp/hostapd.pid); then
+	if ! ps aux | grep -q $(cat /tmp/dnsmasq.pid); then
 		bashio::log.error "dnsmasq is down !"
 		flush_net
-		kill $(cat /tmp/hostapd.pid)
 		exit 2
 	fi
 

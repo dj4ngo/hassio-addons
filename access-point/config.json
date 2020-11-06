@@ -49,8 +49,8 @@
     "dns": ["192.168.99.1"],
     "forwards": [],
     "hosts": [],
-    "debug": false
-
+    "debug": false,
+    "hostapd_config": " interface=wlp1s0u1u2\n driver=nl80211\n ssid=Pi\n hw_mode=g\n channel=1\n macaddr_acl=0\n auth_algs=1\n wpa=2\n wpa_key_mgmt=WPA-PSK\n wpa_passphrase=raspberry\n rsn_pairwise=CCMP\n wpa_pairwise=CCMP\n"
   },
   "schema": {
     "interface": "str",
@@ -78,6 +78,7 @@
         "ip": "str"
       }
     ],
-    "debug": "bool"
+    "debug": "bool",
+    "hostapd_config": "str"
   }
 } 
