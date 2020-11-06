@@ -49,6 +49,8 @@ interface: wlan0
 ssid: Pi
 masked_ssid: true
 force_reset_other_interfaces: false
+auth_alg: wpa2
+wep_key: abcdeabcde
 wpa_passphrase: raspberry
 channel: 6
 address: 192.168.99.1
@@ -119,10 +121,18 @@ Set the desired SSID for this network.
 
 Setting this parameter to true will mask the SSID. The SSID will so not be visible.
 
+#### auth_alg: wpa2|wep
+
+WiFi authentication algorithm. Only WEP and WPA2 are supported.
+
+
+#### wep_key: abcdeabcde
+
+Here is the WEP key, as reminder WEP key is in hexa and requires 10 HEX char minimum.
+
 #### wpa_passphrase: raspberry
 
-Here is the password/passphrase of the network. Only WPA2 authentication method is
-available.
+Here is the password/passphrase of the network. 
 
 
 #### channel: 6

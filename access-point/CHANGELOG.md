@@ -1,6 +1,10 @@
 # Changelog
 
 
+## [0.13] - 2020-11-06
+### Add:
+- Add WEP auth algorithm due to sometimes some instability with WEP2
+
 ## [0.12] - 2020-11-06
 ### Add:
 - Change background mode of hostapd to have logs on connect

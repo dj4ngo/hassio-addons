@@ -96,16 +96,40 @@ driver=nl80211
 hw_mode=g
 # Accept all MAC addresses
 macaddr_acl=0
-# Bit field: 1=wpa, 2=wep, 3=both
-auth_algs=1
 ssid=$(bashio::config 'ssid')
 channel=$(bashio::config 'channel')
+EOF
+
+
+case $(bashio::config 'auth_alg') in
+	wep)
+		cat << EOF >> ${HOSTAPD_CONFIG}
+ignore_broadcast_ssid=0
+wep_default_key=1
+wep_key1=$(bashio::config 'wep_key')
+wep_key_len_broadcast=5
+wep_key_len_unicast=5
+wep_rekey_period=300
+EOF
+		;;
+	wpa2)
+		cat << EOF >> ${HOSTAPD_CONFIG}
+# Bit field: 1=wpa, 2=wep, 3=both
+auth_algs=1
 wpa=2
 wpa_key_mgmt=WPA-PSK
 rsn_pairwise=CCMP
 wpa_pairwise=CCMP
 wpa_passphrase=$(bashio::config 'wpa_passphrase')
 EOF
+		;;
+	*)
+		bashio::log.error "Error: auth_alg parameter not 'wep' or 'wpa2' !"
+		exit 3
+		;;
+esac
+
+
 
 if [ "$(bashio::config 'masked_ssid')" == "true" ]; then
 	echo "ignore_broadcast_ssid=1" >> $HOSTAPD_CONFIG

@@ -1,6 +1,6 @@
 {
   "name": "Access Point",
-  "version": "0.12",
+  "version": "0.13",
   "slug": "access-point",
   "description": "Complete Wi-Fi Access Point for Home Assistant",
   "arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],
@@ -34,11 +34,13 @@
     "backup:rw"
   ],
   "options": {
-    "interface": "wlp1s0u1u2",
+    "interface": "wlan0",
     "ssid": "Pi",
     "masked_ssid": false,
     "force_reset_other_interfaces": false,
+    "auth_alg": "wpa2",
     "wpa_passphrase": "raspberry",
+    "wep_key": "abcdeabcde",
     "channel": "6",
     "address": "192.168.99.1",
     "netmask": "255.255.255.0",
@@ -55,7 +57,9 @@
     "ssid": "str",
     "masked_ssid": "bool",
     "force_reset_other_interfaces": "bool",
+    "auth_alg": "list(wep|wpa2)",
     "wpa_passphrase": "str",
+    "wep_key": "str",
     "channel": "int",
     "address": "str",
     "netmask": "str",
