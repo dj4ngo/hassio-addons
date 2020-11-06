@@ -1,6 +1,6 @@
 {
   "name": "Access Point",
-  "version": "0.7",
+  "version": "0.8",
   "slug": "access-point",
   "description": "Raspberry Pi as WiFi hotspot",
   "arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],
@@ -36,6 +36,7 @@
     "interface": "wlp1s0u1u2",
     "ssid": "Pi",
     "masked_ssid": true,
+    "force_reset_other_interfaces": true,
     "wpa_passphrase": "raspberry",
     "channel": "6",
     "address": "192.168.99.1",
@@ -52,6 +53,7 @@
     "interface": "str",
     "ssid": "str",
     "masked_ssid": "bool",
+    "force_reset_other_interfaces": "bool",
     "wpa_passphrase": "str",
     "channel": "int",
     "address": "str",

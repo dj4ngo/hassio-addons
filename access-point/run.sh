@@ -11,34 +11,41 @@ INTERFACES_CONFIG="/etc/network/interfaces"
 DNSMASQ_CONFIG="/etc/dnsmasq.conf"
 
 
-if_names="$(ls -d1  /sys/class/ieee80211/*/device/net/* | cut -d'/' -f8 | tr '\n' ' ')"
-bashio::log.info "List all available wireless interfaces : $if_names"
-
 function flush_net () {
 
-	ip link set $(bashio::config 'interface') down
-	ip addr flush dev $(bashio::config 'interface') 
-	ip addr show  $(bashio::config 'interface')
+	ifname="$(bashio::config 'interface')"
+	ifname="${1:-$ifname}"
+	ip link set $ifname down
+	ip addr flush dev $ifname 
+	ip addr show  $ifname
+	unset ifname
 
 }
 
 
 function clean_stop () {
 	bashio::log.info "Clean stop"
-	bashio::log.info "SIGNAL received : $1"
 	flush_net
 	ifdown $(bashio::config 'interface')
 	ip route show
 	sleep 5
 }
+trap 'clean_stop' SIGTERM TERM
 
-trap 'clean_stop SIGTERM' SIGTERM
-trap 'clean_stop SIGINT' SIGINT
-trap 'clean_stop SIGQUIT' SIGQUIT
-trap 'clean_stop SIGWINCH' SIGWINCH
-trap 'clean_stop KILL' KILL
-trap 'clean_stop KILL' TERM
-trap 'clean_stop EXIT' EXIT
+
+if_names="$(ls -d1  /sys/class/ieee80211/*/device/net/* | cut -d'/' -f8 | tr '\n' ' ')"
+bashio::log.info "List all available wireless interfaces : $if_names"
+
+
+if [ "$(bashio::config 'force_reset_other_interfaces')" == "true" ]; then
+	bashio::log.info "Cleaning other interfaces if they already have $(bashio::config 'address') adress"
+	for ifname in $(ip route show | grep "$(bashio::config 'address')" | cut -d' ' -f3); do
+		bashio::log.warning "Cleaning $ifname, having $(bashio::config 'address') ip adress"
+		flush_net $ifname
+	done
+
+fi
+
 
 bashio::log.info "Starting..."
 
