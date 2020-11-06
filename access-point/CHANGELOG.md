@@ -1,6 +1,10 @@
 # Changelog
 
 
+## [0.12] - 2020-11-06
+### Add:
+- Change background mode of hostapd to have logs on connect
+
 ## [0.11] - 2020-11-06
 ### Doc:
 - Documentation and changelog initial version

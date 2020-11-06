@@ -1,6 +1,6 @@
 {
   "name": "Access Point",
-  "version": "0.11",
+  "version": "0.12",
   "slug": "access-point",
   "description": "Complete Wi-Fi Access Point for Home Assistant",
   "arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],

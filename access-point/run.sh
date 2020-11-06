@@ -175,7 +175,8 @@ $DEBUG && cat $DNSMASQ_CONFIG
 #############
 
 bashio::log.info "Starting HostAP daemon ..." 
-hostapd  -B -P /tmp/hostapd.pid /etc/hostapd/hostapd.conf 
+nohup hostapd   /etc/hostapd/hostapd.conf &
+echo "$!" > /tmp/hostapd.pid
 
 $DEBUG && bashio::log.debug "Print Network configuration"
 $DEBUG && bashio::log.debug "ip addr show $(bashio::config 'interface')"
