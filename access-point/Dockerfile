@@ -7,8 +7,6 @@ STOPSIGNAL SIGTERM
 
 RUN apk add --no-cache hostapd dnsmasq
 
-COPY dnsmasq.conf /etc/
-COPY hostapd.conf /etc/hostapd/hostapd.conf
 COPY run.sh /
 
 RUN chmod a+x /run.sh

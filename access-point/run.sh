@@ -24,7 +24,7 @@ function flush_net () {
 
 
 function clean_stop () {
-	bashio::log.info "Clean stop" &
+	bashio::log.info "Clean stop"
 	flush_net
 	ifdown $(bashio::config 'interface')
 	ip route show
@@ -38,6 +38,11 @@ if_names="$(ls -d1  /sys/class/ieee80211/*/device/net/* | cut -d'/' -f8 | tr '\n
 bashio::log.info "List all available wireless interfaces : $if_names"
 
 
+
+#######################
+# iface configuration #
+#######################
+
 if [ "$(bashio::config 'force_reset_other_interfaces')" == "true" ]; then
 	bashio::log.info "Cleaning other interfaces if they already have $(bashio::config 'address') adress"
 	for ifname in $(ip route show | grep "$(bashio::config 'address')" | cut -d' ' -f3); do
@@ -48,9 +53,6 @@ if [ "$(bashio::config 'force_reset_other_interfaces')" == "true" ]; then
 fi
 
 
-bashio::log.info "Starting..."
-
-# Networking part
 bashio::log.info "Configure interfaces..."
 
 bashio::log.debug "Create ${INTERFACES_CONFIG%/*} dir"
@@ -79,13 +81,31 @@ bashio::log.info "Starting interface ...";
 ifup $(bashio::config 'interface')
 ip addr show  $(bashio::config 'interface')
 
+#########################
+# Hostapd Configuration #
+#########################
 
-# Hostapd part
+bashio::log.debug "Create ${HOSTAPD_CONFIG%/*} dir"
+mkdir -p ${HOSTAPD_CONFIG%/*}
+
 bashio::log.info "Configure hostapd ..."
-sed -i "s/__INTERFACE__/$(bashio::config 'interface')/" $HOSTAPD_CONFIG
-sed -i "s/__SSID__/$(bashio::config 'ssid')/" $HOSTAPD_CONFIG
-sed -i "s/__CHANNEL__/$(bashio::config 'channel')/" $HOSTAPD_CONFIG
-sed -i "s/__WPA_PASSPHRASE__/$(bashio::config 'wpa_passphrase')/" $HOSTAPD_CONFIG
+cat << EOF > ${HOSTAPD_CONFIG}
+interface=$(bashio::config 'interface')
+driver=nl80211
+# Use the 2.4GHz band
+hw_mode=g
+# Accept all MAC addresses
+macaddr_acl=0
+# Bit field: 1=wpa, 2=wep, 3=both
+auth_algs=1
+ssid=$(bashio::config 'ssid')
+channel=$(bashio::config 'channel')
+wpa=2
+wpa_key_mgmt=WPA-PSK
+rsn_pairwise=CCMP
+wpa_pairwise=CCMP
+wpa_passphrase=$(bashio::config 'wpa_passphrase')
+EOF
 
 if [ "$(bashio::config 'masked_ssid')" == "true" ]; then
 	echo "ignore_broadcast_ssid=1" >> $HOSTAPD_CONFIG
@@ -94,10 +114,25 @@ fi
 $DEBUG && cat $HOSTAPD_CONFIG
 
 
+#########################
+# Dnsmasq Configuration #
+#########################
 
-
+bashio::log.debug "Create ${DNSMASQ_CONFIG%/*} dir"
+mkdir -p ${DNSMASQ_CONFIG%/*}
 
 bashio::log.info "Configuring dnsmasq..."
+
+
+cat << EOF > ${DNSMASQ_CONFIG}
+no-resolv
+no-hosts
+log-queries
+log-facility=-
+no-poll
+user=root
+EOF
+
 # Add interface to bind
 echo "interface=$(bashio::config 'interface')" >> "${DNSMASQ_CONFIG}"
 
@@ -123,18 +158,21 @@ for host in $(bashio::config 'hosts|keys'); do
 done
 
 # DHCP configuration
-echo "# DHCP range" >> ${DNSMASQ_CONFIG}
-echo "dhcp-range=$(bashio::config 'dhcp_range'),12h" >> ${DNSMASQ_CONFIG}
-echo "# Netmask" >> ${DNSMASQ_CONFIG}
-echo "dhcp-option=1,$(bashio::config 'netmask')" >> ${DNSMASQ_CONFIG}
-echo "# Route" >> ${DNSMASQ_CONFIG}
-echo "dhcp-option=3,$(bashio::config 'address')" >> ${DNSMASQ_CONFIG}
+cat << EOF >> ${DNSMASQ_CONFIG}
+# DHCP range
+dhcp-range=$(bashio::config 'dhcp_range'),12h
+# Netmask
+dhcp-option=1,$(bashio::config 'netmask')
+# Route
+dhcp-option=3,$(bashio::config 'address')
+EOF
 
 
 $DEBUG && cat $DNSMASQ_CONFIG
 
-
-# Executions
+#############
+# Execution #
+#############
 
 bashio::log.info "Starting HostAP daemon ..." 
 hostapd  -B -P /tmp/hostapd.pid /etc/hostapd/hostapd.conf 
