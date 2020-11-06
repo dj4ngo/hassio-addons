@@ -24,13 +24,14 @@ function flush_net () {
 
 
 function clean_stop () {
-	bashio::log.info "Clean stop"
+	bashio::log.info "Clean stop" &
 	flush_net
 	ifdown $(bashio::config 'interface')
 	ip route show
 	sleep 5
 }
-trap 'clean_stop' SIGTERM TERM
+trap 'clean_stop' SIGTERM
+trap 'clean_stop' TERM
 
 
 if_names="$(ls -d1  /sys/class/ieee80211/*/device/net/* | cut -d'/' -f8 | tr '\n' ' ')"
@@ -145,8 +146,9 @@ $DEBUG && bashio::log.debug "ip route show"
 $DEBUG && ip route show
 
 bashio::log.info "Starting dnsmasq..."
-dnsmasq -C "${DNSMASQ_CONFIG}" -z -x /tmp/dnsmasq.pid
+nohup dnsmasq -C "${DNSMASQ_CONFIG}" -z -x /tmp/dnsmasq.pid &
 
+bashio::log.info "Starting monitoring of dnsmasq and hostapd process..."
 while :; do
 	if ! ps aux | grep -q $(cat /tmp/hostapd.pid); then
 		bashio::log.error "hostapd is down !"
